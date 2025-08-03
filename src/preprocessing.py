@@ -15,7 +15,7 @@ from PIL import Image
 from tqdm import tqdm
 
 dataset_path = r"C:\github_ws\SynthFlora_NeuralFlowersDancinginLatentSpace\data"
-classes = ["daisy", "dandelion", "roses", "sunflowers", "tulips"]
+classes = ["daisy", "dandelion", "rose", "sunflower", "tulip"]
 
 
 def preprocess_image(image_path, target_size=(28, 28)):
