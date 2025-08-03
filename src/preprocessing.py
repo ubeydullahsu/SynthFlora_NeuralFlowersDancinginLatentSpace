@@ -156,5 +156,5 @@ def show_sample_images(X, y, num_samples=5):
 
     plt.show()
 
-X, y = test_preprocessing()
-show_sample_images(X, y)
+# X, y = test_preprocessing()
+# show_sample_images(X, y)
