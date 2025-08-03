@@ -148,7 +148,7 @@ def show_sample_images(X, y, num_samples=5):
         plt.subplot(1, num_samples, i + 1)
         img = X[i].reshape(28, 28, 3)
         plt.imshow(img, interpolation='nearest')
-        plt.title(classes[y[i]])
+        plt.title(y[i])
         plt.axis('off') 
 
     plt.show()
