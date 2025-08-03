@@ -68,7 +68,7 @@ def apply_pastel_effect(img_array):
     pastel_img = img_array * weights
 
     # Decrease saturation (add gray)
-    gray = img_array.mean(axis=2, keepdims=True)
+    gray = np.mean(pastel_img, axis=-1, keepdims=True)  # average across channels
     pastel_img = pastel_img * 0.7 + gray * 0.3
 
     return np.clip(pastel_img, 0, 1)  # ensure values are in [0, 1]
