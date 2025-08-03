@@ -67,6 +67,9 @@ def apply_pastel_effect(img_array):
     # Apply weights to each channel
     pastel_img = img_array * weights
 
+    # Normalize the pastel image
+    pastel_img = pastel_img / np.max(pastel_img) if np.max(pastel_img) > 0 else pastel_img 
+
     # Decrease saturation (add gray)
     gray = np.mean(pastel_img, axis=-1, keepdims=True)  # average across channels
     pastel_img = pastel_img * 0.7 + gray * 0.3
@@ -103,22 +106,21 @@ def preprocess_dataset(dataset_path, target_size=(28, 28), save_csv=True):
             img_path = os.path.join(class_path, img_file)
             img_processed = preprocess_image(img_path)
 
-            X.append(img_processed.flatten())  # flatten to 1D array
+            X.append(img_processed)  # flatten to 1D array
             y.append(class_name)
 
     # Convert lists to numpy arrays
-    X = np.array(img_processed.flatten()) # 28*28*3 = 2352
-    y = np.array(classes.index(class_name) for class_name in y)
+    X = np.array(X) # 28*28*3 = 2352
+    y = np.array(y)
 
     # pastel effect
     X = np.array([apply_pastel_effect(img) for img in X])
-    X = X.reshape(-1, 2352)  # ensure shape is (n_samples, 2352)
+    y = np.array([classes.index(label) for label in y])  # convert labels to indices
 
     if save_csv:
-        df = pd.DataFrame(X)
+        df = pd.DataFrame(X.flatten().reshape(len(X), -1))  # flatten each image to a row
         df['label'] = y
         df.to_csv(os.path.join(dataset_path, 'preprocessed_flowers.csv'), index=False)
-
 
     return X, y
 
@@ -147,8 +149,9 @@ def show_sample_images(X, y, num_samples=5):
     for i in range(num_samples):
         plt.subplot(1, num_samples, i + 1)
         img = X[i].reshape(28, 28, 3)
+    
         plt.imshow(img, interpolation='nearest')
-        plt.title(y[i])
+        plt.title(f"{y[i]}")
         plt.axis('off') 
 
     plt.show()
