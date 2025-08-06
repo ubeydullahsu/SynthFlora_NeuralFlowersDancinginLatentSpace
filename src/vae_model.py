@@ -134,5 +134,14 @@ def encoder_backward(encoder, decoder, x, mu, logvar, z, x_hat, learning_rate=0.
 
     # Decoder gradients
     dL_dh2 = np.dot(encoder.W2.T, dL_dx_hat)
-    dL_dW2 = np.dot(dL_dx_hat, decoder.h1.T)
+    dL_dW2 = np.dot(dL_dh2, encoder.W1.T)
     dL_db2 = np.sum(dL_dx_hat, axis=1, keepdims=True).T
+
+    # Encoder gradients
+    dL_dz = np.dot(decoder.W1.T, dL_dh2 * (decoder.W1 > 0))  # ReLU derivative
+    dL_dmu = dL_dz
+    dL_dLogvar = dL_dz * (0.5 * np.exp(logvar) * (z - mu)) - 0.5 * (1 - np.exp(logvar)) # Derivative of log variance
+
+    # Update encoder weights and biases
+    encoder.W1 -= learning_rate * np.dot(dL_dmu, encoder.W1.T)
+    encoder.b1 -= learning_rate * np.sum(dL_dmu, axis=1, keepdims=True).T
