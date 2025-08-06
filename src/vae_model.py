@@ -39,7 +39,7 @@ class Encoder:
         Returns:
             tuple: Mean and log variance of the latent space.
         """
-        h = np.dot(self.W1, x.T) + self.b1
+        h = np.dot(self.W1.T, x) + self.b1
         h = np.maximum(0, h)    # ReLU activation
 
         mu = np.dot(self.W2_mean, h) + self.b2_mean
@@ -115,6 +115,7 @@ def vae_loss(x, x_hat, mu, logvar):
 
     return BCE + KLD
 
+
 def encoder_backward(encoder, decoder, x, mu, logvar, z, x_hat, learning_rate=0.001):
     """
     Backward pass for the encoder.
@@ -145,3 +146,35 @@ def encoder_backward(encoder, decoder, x, mu, logvar, z, x_hat, learning_rate=0.
     # Update encoder weights and biases
     encoder.W1 -= learning_rate * np.dot(dL_dmu, encoder.W1.T)
     encoder.b1 -= learning_rate * np.sum(dL_dmu, axis=1, keepdims=True).T
+
+
+def decoder_backward(decoder, x, z, x_hat, learning_rate=0.001):
+    """
+    Backward pass for the decoder.
+    Args:
+        decoder (Decoder): Decoder instance.
+        x (np.ndarray): Original input data.    
+        z (np.ndarray): Sampled latent vector.
+        x_hat (np.ndarray): Reconstructed output from the decoder.
+        learning_rate (float): Learning rate for the optimizer.
+    """
+
+    # Compute gradients for decoder weights and biases
+    dL_dx_hat = (x_hat - x) / x.shape[0]
+
+    # W2 and b2 gradients
+    dL_dW2 = np.dot(dL_dx_hat, decoder.W1.T)
+    dL_db2 = np.sum(dL_dx_hat, axis=1, keepdims=True)
+
+    # Hidden layer gradients
+    dL_dh1 = np.dot(decoder.W2.T, dL_dx_hat) * (decoder.W1 > 0)
+
+    # W1 and b1 gradients
+    dL_dW1 = np.dot(dL_dh1, z.T)
+    dL_db1 = np.sum(dL_dh1, axis=1, keepdims=True)
+
+    # Update decoder weights and biases
+    decoder.W1 -= learning_rate * dL_dW1
+    decoder.b1 -= learning_rate * dL_db1
+    decoder.W2 -= learning_rate * dL_dW2
+    decoder.b2 -= learning_rate * dL_db2

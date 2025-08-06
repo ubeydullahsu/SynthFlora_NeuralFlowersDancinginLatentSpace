@@ -115,13 +115,18 @@ def preprocess_dataset(dataset_path, target_size=(28, 28), save_csv=True):
 
     # pastel effect
     X = np.array([apply_pastel_effect(img) for img in X])
+    X = X.flatten().reshape(len(X), -1)
     y = np.array([classes.index(label) for label in y])  # convert labels to indices
 
     if save_csv:
-        df = pd.DataFrame(X.flatten().reshape(len(X), -1))  # flatten each image to a row
+        df = pd.DataFrame(X)  # flatten each image to a row
         df['label'] = y
         df.to_csv(os.path.join(dataset_path, 'preprocessed_flowers.csv'), index=False)
 
+    #X = np.transpose(X, (1, 2, 0, 3))  # Change shape to (n_samples, 3, 28, 28)
+    #X = X.reshape(-1, X.shape[0])  # Flatten to (n_samples, 2352)
+    
+    #X = X.T  # Transpose to (2352, n_samples)
     return X, y
 
 
